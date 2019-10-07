@@ -1,5 +1,4 @@
 package agents;
-// Meke
 
 // Exemple de Bitxo 
 public class Bitxo2 extends Agent
