@@ -1,6 +1,5 @@
 package agents;
 
-// Exemple de Bitxo 
 public class Bitxo22 extends Agent
 {
     static final boolean DEBUG = false;
@@ -19,14 +18,14 @@ public class Bitxo22 extends Agent
     long temps;
 
     public Bitxo22(Agents pare) {
-        super(pare, "Bitxo22", "imatges/chomp.gif");
+        super(pare, "Bitxo22", "imatges/chomp_rotado.gif");
     }
 
     @Override
     public void inicia()
     {
-        posaAngleVisors(45);
-        posaDistanciaVisors(350);
+        posaAngleVisors(70);
+        posaDistanciaVisors(400);
         posaVelocitatLineal(6);
         posaVelocitatAngular(6);
         espera = 0;
