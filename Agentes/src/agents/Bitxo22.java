@@ -18,7 +18,7 @@ public class Bitxo22 extends Agent
     long temps;
 
     public Bitxo22(Agents pare) {
-        super(pare, "Bitxo22", "imatges/chomp_rotado.gif");
+        super(pare, "CHOP", "imatges/chop.gif");
     }
 
     @Override 
