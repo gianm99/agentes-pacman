@@ -21,11 +21,11 @@ public class Bitxo22 extends Agent
         super(pare, "Bitxo22", "imatges/chomp_rotado.gif");
     }
 
-    @Override
+    @Override 
     public void inicia()
     {
-        posaAngleVisors(70);
-        posaDistanciaVisors(400);
+        posaAngleVisors(40);
+        posaDistanciaVisors(200);
         posaVelocitatLineal(6);
         posaVelocitatAngular(6);
         espera = 0;
@@ -57,7 +57,7 @@ public class Bitxo22 extends Agent
                 else // hi ha un obstacle, gira i parteix
                 {
                     gira(20); // 20 graus
-                    if (hiHaParedDavant(20)) enrere();
+                    if (hiHaParedDavant(10)) enrere();
                     else endavant();
                     espera=3;
                 }
