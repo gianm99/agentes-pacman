@@ -1,7 +1,6 @@
 package agents;
 
-import java.util.Iterator;
-
+//comentario de prueba
 public class Bitxo22 extends Agent {
 
     static final boolean DEBUG = false;
