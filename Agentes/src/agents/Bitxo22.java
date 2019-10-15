@@ -1,71 +1,68 @@
 package agents;
 
-public class Bitxo22 extends Agent
-{
+public class Bitxo22 extends Agent {
+
     static final boolean DEBUG = false;
 
     static final int PARET = 0;
-    static final int NAU   = 1;
-    static final int RES   = -1;
+    static final int NAU = 1;
+    static final int RES = -1;
 
     static final int ESQUERRA = 0;
-    static final int CENTRAL  = 1;
-    static final int DRETA    = 2;
+    static final int CENTRAL = 1;
+    static final int DRETA = 2;
 
     Estat estat;
     int espera = 0;
-    
+
     long temps;
 
     public Bitxo22(Agents pare) {
-        super(pare, "CHOP", "imatges/chop.gif");
+        super(pare, "Chop", "imatges/chop.gif");
     }
 
-    @Override 
-    public void inicia()
-    {
-        posaAngleVisors(40);
-        posaDistanciaVisors(200);
-        posaVelocitatLineal(6);
-        posaVelocitatAngular(6);
+    @Override
+    public void inicia() {
+        posaAngleVisors(40);        // 0 - 70
+        posaDistanciaVisors(200);   // 0 - 400
+        posaVelocitatLineal(5);     // 1 - 6
+        posaVelocitatAngular(4);    // 1 - 9
         espera = 0;
         temps = 0;
     }
 
     @Override
-    public void avaluaComportament()
-    {
+    public void avaluaComportament() {
         int dir;
 
         temps++;
         estat = estatCombat();
         if (espera > 0) {
             espera--;
-        }
-        else
-        {
+        } else {
             atura();
-            
+
             if (estat.enCollisio) // situació de nau bloquejada
             {
                 // si veu la nau, dispara
 
-                if (estat.objecteVisor[CENTRAL] == NAU)
-                {
+                if (estat.objecteVisor[CENTRAL] == NAU) {
                     dispara();   //bloqueig per nau, no giris dispara
-                }
+                } 
                 else // hi ha un obstacle, gira i parteix
                 {
-                    gira(20); // 20 graus
-                    if (hiHaParedDavant(10)) enrere();
-                    else endavant();
-                    espera=3;
+                    gira(20); // gira 20 graus
+                    if (hiHaParedDavant(10)) {
+                        enrere();
+                    } else {
+                        endavant();
+                    }
+                    espera = 3;
                 }
             } else {
                 endavant();
-                
-                if (estat.objecteVisor[CENTRAL]==NAU && !estat.disparant)
-                {
+
+                if (estat.objecteVisor[CENTRAL] == NAU && !estat.disparant) {
                     dispara();
                 }
                 // Miram els visors per detectar els obstacles
@@ -80,7 +77,7 @@ public class Bitxo22 extends Agent
                 if (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] < 45) {
                     sensor += 4;
                 }
-                
+
                 switch (sensor) {
                     case 0:
                         endavant();
@@ -101,11 +98,12 @@ public class Bitxo22 extends Agent
                         double distancia;
                         distancia = minimaDistanciaVisors();
 
-                        if (distancia < 15) {
+                        if (distancia < 10) {
                             espera = 8;
                             enrere();
-                        } 
-                        else esquerra();
+                        } else {
+                            esquerra();
+                        }
                         break;
                 }
 
@@ -114,32 +112,36 @@ public class Bitxo22 extends Agent
         }
     }
 
-    boolean hiHaParedDavant(int dist)
-    {
+    boolean hiHaParedDavant(int dist) {
 
-       if (estat.objecteVisor[ESQUERRA]== PARET && estat.distanciaVisors[ESQUERRA]<=dist)
-           return true;
+        if (estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] <= dist) {
+            return true;
+        }
 
-       if (estat.objecteVisor[CENTRAL ]== PARET && estat.distanciaVisors[CENTRAL ]<=dist)
-           return true;
+        if (estat.objecteVisor[CENTRAL] == PARET && estat.distanciaVisors[CENTRAL] <= dist) {
+            return true;
+        }
 
-       if (estat.objecteVisor[DRETA   ]== PARET && estat.distanciaVisors[DRETA   ]<=dist)
-           return true;
-       
-       return false;
+        if (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] <= dist) {
+            return true;
+        }
+
+        return false;
     }
 
-    double minimaDistanciaVisors()
-    {
+    double minimaDistanciaVisors() {
         double minim;
 
         minim = Double.POSITIVE_INFINITY;
-        if (estat.objecteVisor[ESQUERRA] == PARET)
+        if (estat.objecteVisor[ESQUERRA] == PARET) {
             minim = estat.distanciaVisors[ESQUERRA];
-        if (estat.objecteVisor[CENTRAL] == PARET && estat.distanciaVisors[CENTRAL]<minim)
+        }
+        if (estat.objecteVisor[CENTRAL] == PARET && estat.distanciaVisors[CENTRAL] < minim) {
             minim = estat.distanciaVisors[CENTRAL];
-        if (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA]<minim)
+        }
+        if (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] < minim) {
             minim = estat.distanciaVisors[DRETA];
+        }
         return minim;
     }
 }
