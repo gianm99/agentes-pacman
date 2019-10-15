@@ -1,5 +1,7 @@
 package agents;
 
+import java.util.Iterator;
+
 public class Bitxo22 extends Agent {
 
     static final boolean DEBUG = false;
@@ -111,7 +113,14 @@ public class Bitxo22 extends Agent {
 
         }
     }
-
+    boolean cercarRecursos(int dist){
+        boolean trobat=false;
+        
+        for (int i=0; i<estat.numRecursos;i++) {
+            
+        }
+        return trobat;
+    }
     boolean hiHaParedDavant(int dist) {
 
         if (estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] <= dist) {
