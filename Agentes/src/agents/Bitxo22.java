@@ -128,6 +128,15 @@ public class Bitxo22 extends Agent
        
        return false;
     }
+    
+    public Objecte ObjecteMesProper(Objecte r1,Objecte r2){
+        if(r1.agafaDistancia()<=r2.agafaDistancia()){
+            return r1;
+        }else{
+            return r2;
+        }
+        
+    }
 
     double minimaDistanciaVisors()
     {
