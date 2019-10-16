@@ -1,8 +1,6 @@
 package agents;
 
-//comentario de prueba
 public class Bitxo22 extends Agent {
-
     static final boolean DEBUG = false;
 
     static final int PARET = 0;
@@ -52,12 +50,11 @@ public class Bitxo22 extends Agent {
                 } 
                 else // hi ha un obstacle, gira i parteix
                 {
-                    gira(20); // gira 20 graus
-                    if (hiHaParedDavant(10)) {
+                    gira(20); // 20 graus
+                    if (hiHaParedDavant(10))
                         enrere();
-                    } else {
+                    else
                         endavant();
-                    }
                     espera = 3;
                 }
             } else {
@@ -80,32 +77,31 @@ public class Bitxo22 extends Agent {
                 }
 
                 switch (sensor) {
-                    case 0:
-                        endavant();
-                        break;
-                    case 1:
-                    case 3:  // esquerra bloquejada
-                        dreta();
-                        break;
-                    case 4:
-                    case 6:  // dreta bloquejada
-                        esquerra();
-                        break;
-                    case 5:
-                        endavant();
-                        break;  // centre lliure
-                    case 2:  // paret devant
-                    case 7:  // si estic molt aprop, torna enrere
-                        double distancia;
-                        distancia = minimaDistanciaVisors();
+                case 0:
+                    endavant();
+                    break;
+                case 1:
+                case 3: // esquerra bloquejada
+                    dreta();
+                    break;
+                case 4:
+                case 6: // dreta bloquejada
+                    esquerra();
+                    break;
+                case 5:
+                    endavant();
+                    break; // centre lliure
+                case 2: // paret devant
+                case 7: // si estic molt aprop, torna enrere
+                    double distancia;
+                    distancia = minimaDistanciaVisors();
 
-                        if (distancia < 10) {
-                            espera = 8;
-                            enrere();
-                        } else {
-                            esquerra();
-                        }
-                        break;
+                    if (distancia < 15) {
+                        espera = 8;
+                        enrere();
+                    } else
+                        esquerra();
+                    break;
                 }
 
             }
@@ -126,24 +122,67 @@ public class Bitxo22 extends Agent {
             return true;
         }
 
-        if (estat.objecteVisor[CENTRAL] == PARET && estat.distanciaVisors[CENTRAL] <= dist) {
+        if (estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] <= dist)
             return true;
-        }
 
-        if (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] <= dist) {
+        if (estat.objecteVisor[CENTRAL] == PARET && estat.distanciaVisors[CENTRAL] <= dist)
             return true;
-        }
+
+        if (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] <= dist)
+            return true;
 
         return false;
     }
-    
-    public Objecte ObjecteMesProper(Objecte r1,Objecte r2){
-        if(r1.agafaDistancia()<=r2.agafaDistancia()){
-            return r1;
-        }else{
-            return r2;
+
+    // public Objecte ObjecteMesProper(Objecte r1,Objecte r2){
+    // if(r1.agafaDistancia()<=r2.agafaDistancia()){
+    // return r1;
+    // }else{
+    // return r2;
+    // }
+
+    // }
+
+    public Objecte closestRecurs() {
+        Objecte closestRecurs;
+        closestRecurs = estat.recurs[0];
+
+        for (int i = 0; i < estat.numRecursos; i++) {
+            if (estat.recurs[i].agafaDistancia() < closestRecurs.agafaDistancia()) {
+                closestRecurs = estat.recurs[i];
+            }
+
         }
-        
+
+        return closestRecurs;
+    }
+
+    public Objecte closestEnemic() {
+        Objecte closestenemy;
+        closestenemy = estat.enemic[0];
+
+        for (int i = 0; i < estat.numEnemics; i++) {
+            if (estat.enemic[i].agafaDistancia() < closestenemy.agafaDistancia()) {
+                closestenemy = estat.enemic[i];
+            }
+
+        }
+
+        return closestenemy;
+    }
+
+    public Objecte closestMina() {
+        Objecte closestMina;
+        closestMina = estat.mina[0];
+
+        for (int i = 0; i < estat.numMines; i++) {
+            if (estat.mina[i].agafaDistancia() < closestMina.agafaDistancia()) {
+                closestMina = estat.mina[i];
+            }
+
+        }
+
+        return closestMina;
     }
 
     double minimaDistanciaVisors() {
