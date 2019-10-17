@@ -1,6 +1,7 @@
 package agents;
 
 public class Bitxo22 extends Agent {
+
     static final boolean DEBUG = false;
 
     static final int PARET = 0;
@@ -23,7 +24,7 @@ public class Bitxo22 extends Agent {
     @Override
     public void inicia() {
         posaAngleVisors(40);        // 0 - 70
-        posaDistanciaVisors(200);   // 0 - 400
+        posaDistanciaVisors(300);   // 0 - 400
         posaVelocitatLineal(5);     // 1 - 6
         posaVelocitatAngular(4);    // 1 - 9
         espera = 0;
@@ -47,20 +48,22 @@ public class Bitxo22 extends Agent {
 
                 if (estat.objecteVisor[CENTRAL] == NAU) {
                     dispara();   //bloqueig per nau, no giris dispara
-                } 
-                else // hi ha un obstacle, gira i parteix
+                } else // hi ha un obstacle, gira i parteix
                 {
                     gira(20); // 20 graus
-                    if (hiHaParedDavant(10))
+                    if (hiHaParedDavant(10)) {
                         enrere();
-                    else
+                    } else {
                         endavant();
+                    }
                     espera = 3;
                 }
             } else {
-                endavant();
 
-                if (estat.objecteVisor[CENTRAL] == NAU && !estat.disparant) {
+                endavant();
+                ObjecteMesProper();
+
+                if (estat.objecteVisor[CENTRAL] == NAU && !estat.disparant && estat.bales>7) {
                     dispara();
                 }
                 // Miram els visors per detectar els obstacles
@@ -77,71 +80,84 @@ public class Bitxo22 extends Agent {
                 }
 
                 switch (sensor) {
-                case 0:
-                    endavant();
-                    break;
-                case 1:
-                case 3: // esquerra bloquejada
-                    dreta();
-                    break;
-                case 4:
-                case 6: // dreta bloquejada
-                    esquerra();
-                    break;
-                case 5:
-                    endavant();
-                    break; // centre lliure
-                case 2: // paret devant
-                case 7: // si estic molt aprop, torna enrere
-                    double distancia;
-                    distancia = minimaDistanciaVisors();
-
-                    if (distancia < 15) {
-                        espera = 8;
-                        enrere();
-                    } else
+                    case 0:
+                        endavant();
+                        break;
+                    case 1:
+                    case 3: // esquerra bloquejada
+                        dreta();
+                        break;
+                    case 4:
+                    case 6: // dreta bloquejada
                         esquerra();
-                    break;
+                        break;
+                    case 5:
+                        endavant();
+                        break; // centre lliure
+                    case 2: // paret devant
+                    case 7: // si estic molt aprop, torna enrere
+                        double distancia;
+                        distancia = minimaDistanciaVisors();
+
+                        if (distancia < 15) {
+                            espera = 8;
+                            enrere();
+                        } else {
+                            esquerra();
+                        }
+                        break;
                 }
 
             }
 
         }
     }
-    boolean cercarRecursos(int dist){
-        boolean trobat=false;
-        
-        for (int i=0; i<estat.numRecursos;i++) {
-            
+
+    boolean cercarRecursos(int dist) {
+        boolean trobat = false;
+
+        for (int i = 0; i < estat.numRecursos; i++) {
+
         }
         return trobat;
     }
+
     boolean hiHaParedDavant(int dist) {
 
         if (estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] <= dist) {
             return true;
         }
 
-        if (estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] <= dist)
+        if (estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] <= dist) {
             return true;
+        }
 
-        if (estat.objecteVisor[CENTRAL] == PARET && estat.distanciaVisors[CENTRAL] <= dist)
+        if (estat.objecteVisor[CENTRAL] == PARET && estat.distanciaVisors[CENTRAL] <= dist) {
             return true;
+        }
 
-        if (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] <= dist)
+        if (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] <= dist) {
             return true;
+        }
 
         return false;
     }
 
-    // public Objecte ObjecteMesProper(Objecte r1,Objecte r2){
-    // if(r1.agafaDistancia()<=r2.agafaDistancia()){
-    // return r1;
-    // }else{
-    // return r2;
-    // }
+    public void ObjecteMesProper() {
+        if (closestRecurs() != null && closestEnemic() != null) {
 
-    // }
+            if (closestEnemic().agafaDistancia() <= closestRecurs().agafaDistancia()) {
+                mira(closestEnemic());
+
+            } else {
+                mira(closestRecurs());
+            }
+        } else if (closestRecurs() != null && closestEnemic() == null) {
+            mira(closestRecurs());
+        } else if (closestRecurs()==null && closestEnemic()!=null) {
+            mira(closestEnemic());
+        }
+    }
 
     public Objecte closestRecurs() {
         Objecte closestRecurs;
