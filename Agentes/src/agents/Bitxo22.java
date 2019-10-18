@@ -50,13 +50,13 @@ public class Bitxo22 extends Agent {
                     dispara();   //bloqueig per nau, no giris dispara
                 } else // hi ha un obstacle, gira i parteix
                 {
-                    gira(20); // 20 graus
+                    gira(40); // 20 graus
                     if (hiHaParedDavant(10)) {
                         enrere();
                     } else {
                         endavant();
                     }
-                    espera = 3;
+                    espera = 2;
                 }
             } else {
 
