@@ -16,6 +16,13 @@ public class Bitxo22 extends Agent {
     int espera = 0;
 
     long temps;
+    long tempsColisio = 0;  //Temps que du el bitxo en col·lisió
+
+    static final int ANGLE_VISORS_NORMAL = 40;
+    static final int ANGLE_VISORS_COLISIO = 0;
+    static final int DISTANCIA_VISORS_NORMAL = 300;
+    static final int VELOCITAT_LINEAL_NORMAL = 5;
+    static final int VELOCITAT_ANGULAR_NORMAL = 4;
 
     public Bitxo22(Agents pare) {
         super(pare, "Chop", "imatges/chop.gif");
@@ -23,10 +30,10 @@ public class Bitxo22 extends Agent {
 
     @Override
     public void inicia() {
-        posaAngleVisors(40);        // 0 - 70
-        posaDistanciaVisors(300);   // 0 - 400
-        posaVelocitatLineal(5);     // 1 - 6
-        posaVelocitatAngular(4);    // 1 - 9
+        posaAngleVisors(ANGLE_VISORS_NORMAL);        // 0 - 70
+        posaDistanciaVisors(DISTANCIA_VISORS_NORMAL);   // 0 - 400
+        posaVelocitatLineal(VELOCITAT_LINEAL_NORMAL);     // 1 - 6
+        posaVelocitatAngular(VELOCITAT_ANGULAR_NORMAL);    // 1 - 9
         espera = 0;
         temps = 0;
     }
@@ -44,26 +51,36 @@ public class Bitxo22 extends Agent {
 
             if (estat.enCollisio) // situació de nau bloquejada
             {
-                // si veu la nau, dispara
+                tempsColisio++;
+                if (tempsColisio == 5) {
+                    posaAngleVisors(ANGLE_VISORS_COLISIO);
+                }
 
+                hyperespaiColisio(tempsColisio);
+                // si veu la nau, dispara
                 if (estat.objecteVisor[CENTRAL] == NAU) {
                     dispara();   //bloqueig per nau, no giris dispara
                 } else // hi ha un obstacle, gira i parteix
                 {
-                    gira(40); // 20 graus
-                    if (hiHaParedDavant(10)) {
+                    if (tempsColisio < 10) {
+                        gira(40); // 40 graus
+                    } else {
+                        gira(-40);
+                    }
+                    if (hiHaParedDavant(15)) {
                         enrere();
+                        espera = 3;
                     } else {
                         endavant();
                     }
-                    espera = 2;
                 }
             } else {
-
+                posaAngleVisors(ANGLE_VISORS_NORMAL);
+                tempsColisio = 0;
                 endavant();
                 ObjecteMesProper();
 
-                if (estat.objecteVisor[CENTRAL] == NAU && !estat.disparant && estat.bales>7) {
+                if (estat.objecteVisor[CENTRAL] == NAU && !estat.disparant && estat.bales > 7) {
                     dispara();
                 }
                 // Miram els visors per detectar els obstacles
@@ -100,10 +117,16 @@ public class Bitxo22 extends Agent {
                         distancia = minimaDistanciaVisors();
 
                         if (distancia < 15) {
-                            espera = 8;
-                            enrere();
-                        } else {
                             esquerra();
+                            enrere();
+                            espera = 2;
+                        } else {
+                            switch(paretMesCercana()){
+                                case ESQUERRA:
+                                    dreta();
+                                case DRETA:
+                                    esquerra();
+                            }
                         }
                         break;
                 }
@@ -113,20 +136,7 @@ public class Bitxo22 extends Agent {
         }
     }
 
-    boolean cercarRecursos(int dist) {
-        boolean trobat = false;
-
-        for (int i = 0; i < estat.numRecursos; i++) {
-
-        }
-        return trobat;
-    }
-
     boolean hiHaParedDavant(int dist) {
-
-        if (estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] <= dist) {
-            return true;
-        }
 
         if (estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] <= dist) {
             return true;
@@ -154,7 +164,7 @@ public class Bitxo22 extends Agent {
             }
         } else if (closestRecurs() != null && closestEnemic() == null) {
             mira(closestRecurs());
-        } else if (closestRecurs()==null && closestEnemic()!=null) {
+        } else if (closestRecurs() == null && closestEnemic() != null) {
             mira(closestEnemic());
         }
     }
@@ -215,5 +225,27 @@ public class Bitxo22 extends Agent {
             minim = estat.distanciaVisors[DRETA];
         }
         return minim;
+    }
+
+    int paretMesCercana() {
+        int mesCercana;
+        double minim;
+
+        minim = Double.POSITIVE_INFINITY;
+        mesCercana = ESQUERRA;
+        if (estat.objecteVisor[ESQUERRA] == PARET) {
+            minim = estat.distanciaVisors[ESQUERRA];
+        }
+        if (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] < minim) {
+            minim = estat.distanciaVisors[DRETA];
+            mesCercana = DRETA;
+        }
+        return mesCercana;
+    }
+
+    void hyperespaiColisio(long tempsColisio) {
+        if (tempsColisio > 30 && estat.hyperespaiDisponibles > 0) {
+            hyperespai();
+        }
     }
 }
