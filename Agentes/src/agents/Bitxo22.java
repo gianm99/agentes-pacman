@@ -21,8 +21,9 @@ public class Bitxo22 extends Agent {
     static final int ANGLE_VISORS_NORMAL = 40;
     static final int ANGLE_VISORS_COLISIO = 0;
     static final int DISTANCIA_VISORS_NORMAL = 300;
-    static final int VELOCITAT_LINEAL_NORMAL = 5;
-    static final int VELOCITAT_ANGULAR_NORMAL = 4;
+    static final int VELOCITAT_LINEAL_NORMAL = 4;
+    static final int VELOCITAT_LINEAL_COMBAT = 6;
+    static final int VELOCITAT_ANGULAR_NORMAL = 9;
 
     public Bitxo22(Agents pare) {
         super(pare, "Chop", "imatges/chop.gif");
@@ -41,8 +42,9 @@ public class Bitxo22 extends Agent {
     @Override
     public void avaluaComportament() {
         int dir;
-
+        Objecte mina;
         temps++;
+
         estat = estatCombat();
         if (espera > 0) {
             espera--;
@@ -58,8 +60,9 @@ public class Bitxo22 extends Agent {
 
                 hyperespaiColisio(tempsColisio);
                 // si veu la nau, dispara
-                if (estat.objecteVisor[CENTRAL] == NAU) {
+                if (estat.objecteVisor[CENTRAL] == NAU && estat.bales > 0) {
                     dispara();   //bloqueig per nau, no giris dispara
+                    tempsColisio = 0;
                 } else // hi ha un obstacle, gira i parteix
                 {
                     if (tempsColisio < 10) {
@@ -79,20 +82,56 @@ public class Bitxo22 extends Agent {
                 tempsColisio = 0;
                 endavant();
                 ObjecteMesProper();
-
-                if (estat.objecteVisor[CENTRAL] == NAU && !estat.disparant && estat.bales > 7) {
+                mina = closestMina();
+                if (estat.objecteVisor[CENTRAL] == NAU && !estat.disparant && estat.bales > 5) {
                     dispara();
                 }
+                //Dodgear minas
+                int minas = 0;
+                if (mina != null) {
+                    if (mina.agafaSector() == 3 && mina.agafaDistancia() < 35) {
+                        minas += 1;
+                    }
+                    if (estat.objecteVisor[CENTRAL] == MINA && mina.agafaDistancia() < 45) {
+                        minas += 2;
+                    }
+                    if (mina.agafaSector() == 2 && mina.agafaDistancia() < 35) {
+                        minas += 4;
+                    }
+                    switch (minas) {
+                        case 0:
+                            endavant();
+                            break;
+                        case 1:
+                        case 3: //mina a la izquierda
+                            gira(-90);
+                            break;
+                        case 4:
+                        case 6: //mina a la derecha
+                            gira(90);
+                            break;
+                        case 5:
+                            endavant();
+                            break;
+                        case 2:
+                        case 7:
+                            gira(90);
+                            enrere();
+                            espera = 2;
+                            break;
+                    }
+                }
+
                 // Miram els visors per detectar els obstacles
                 int sensor = 0;
 
-                if (estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] < 45) {
+                if ((minas == 1 || minas == 3) || (estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] < 45)) {
                     sensor += 1;
                 }
-                if (estat.objecteVisor[CENTRAL] == PARET && estat.distanciaVisors[CENTRAL] < 45) {
+                if ((minas == 4 || minas == 6) || (estat.objecteVisor[CENTRAL] == PARET && estat.distanciaVisors[CENTRAL] < 45)) {
                     sensor += 2;
                 }
-                if (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] < 45) {
+                if ((minas == 2 || minas == 7) || (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] < 45)) {
                     sensor += 4;
                 }
 
@@ -121,7 +160,7 @@ public class Bitxo22 extends Agent {
                             enrere();
                             espera = 2;
                         } else {
-                            switch(paretMesCercana()){
+                            switch (paretMesCercana()) {
                                 case ESQUERRA:
                                     dreta();
                                 case DRETA:
@@ -158,15 +197,22 @@ public class Bitxo22 extends Agent {
 
             if (closestEnemic().agafaDistancia() <= closestRecurs().agafaDistancia()) {
                 mira(closestEnemic());
+                posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
 
             } else {
                 mira(closestRecurs());
             }
         } else if (closestRecurs() != null && closestEnemic() == null) {
             mira(closestRecurs());
+            posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
         } else if (closestRecurs() == null && closestEnemic() != null) {
             mira(closestEnemic());
+            posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
+        } else {
+            posaVelocitatLineal(VELOCITAT_LINEAL_NORMAL);
+
         }
+
     }
 
     public Objecte closestRecurs() {
@@ -247,5 +293,9 @@ public class Bitxo22 extends Agent {
         if (tempsColisio > 30 && estat.hyperespaiDisponibles > 0) {
             hyperespai();
         }
+    }
+
+    void evasio() {
+
     }
 }
