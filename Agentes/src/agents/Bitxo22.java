@@ -21,8 +21,9 @@ public class Bitxo22 extends Agent {
     static final int ANGLE_VISORS_NORMAL = 40;
     static final int ANGLE_VISORS_COLISIO = 0;
     static final int DISTANCIA_VISORS_NORMAL = 300;
-    static final int VELOCITAT_LINEAL_NORMAL = 5;
-    static final int VELOCITAT_ANGULAR_NORMAL = 4;
+    static final int VELOCITAT_LINEAL_NORMAL = 4;
+    static final int VELOCITAT_LINEAL_COMBAT = 6;
+    static final int VELOCITAT_ANGULAR_NORMAL = 9;
 
     public Bitxo22(Agents pare) {
         super(pare, "Chop", "imatges/chop.gif");
@@ -60,6 +61,7 @@ public class Bitxo22 extends Agent {
                 // si veu la nau, dispara
                 if (estat.objecteVisor[CENTRAL] == NAU) {
                     dispara();   //bloqueig per nau, no giris dispara
+                    tempsColisio = 0;
                 } else // hi ha un obstacle, gira i parteix
                 {
                     if (tempsColisio < 10) {
@@ -80,7 +82,7 @@ public class Bitxo22 extends Agent {
                 endavant();
                 ObjecteMesProper();
 
-                if (estat.objecteVisor[CENTRAL] == NAU && !estat.disparant && estat.bales > 7) {
+                if (estat.objecteVisor[CENTRAL] == NAU && !estat.disparant && estat.bales > 5) {
                     dispara();
                 }
                 // Miram els visors per detectar els obstacles
@@ -121,7 +123,7 @@ public class Bitxo22 extends Agent {
                             enrere();
                             espera = 2;
                         } else {
-                            switch(paretMesCercana()){
+                            switch (paretMesCercana()) {
                                 case ESQUERRA:
                                     dreta();
                                 case DRETA:
@@ -158,15 +160,22 @@ public class Bitxo22 extends Agent {
 
             if (closestEnemic().agafaDistancia() <= closestRecurs().agafaDistancia()) {
                 mira(closestEnemic());
+                posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
 
             } else {
                 mira(closestRecurs());
             }
         } else if (closestRecurs() != null && closestEnemic() == null) {
             mira(closestRecurs());
+            posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
         } else if (closestRecurs() == null && closestEnemic() != null) {
             mira(closestEnemic());
+            posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
+        } else {
+            posaVelocitatLineal(VELOCITAT_LINEAL_NORMAL);
+
         }
+
     }
 
     public Objecte closestRecurs() {
@@ -247,5 +256,9 @@ public class Bitxo22 extends Agent {
         if (tempsColisio > 30 && estat.hyperespaiDisponibles > 0) {
             hyperespai();
         }
+    }
+    
+    void evasio(){
+        
     }
 }
