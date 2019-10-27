@@ -120,7 +120,7 @@ public class Bitxo22 extends Agent {
                         double distancia;
                         distancia = minimaDistanciaVisors();
 
-                        if (distancia < 10) {
+                        if (distancia < 15) {
                             gira(90);
                             enrere();
                             espera = 2;
@@ -307,6 +307,9 @@ public class Bitxo22 extends Agent {
                endavant();
            }else{
                dreta();
+           }
+           if(estat.impactesRebuts==4 && estat.hyperespaiDisponibles>0){
+               hyperespai();
            }
         }
     }
