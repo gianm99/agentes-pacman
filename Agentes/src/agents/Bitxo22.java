@@ -13,10 +13,13 @@ public class Bitxo22 extends Agent {
     static final int DRETA = 2;
 
     Estat estat;
+    int anteriorImpactes = 0;
     int espera = 0;
 
     long temps;
-    long tempsColisio = 0;  //Temps que du el bitxo en col·lisió
+    int tempsColisio = 0;  //Temps que du el bitxo en col·lisió
+    int tempsEvasio = 0;
+    boolean enEvasio = false;
 
     static final int ANGLE_VISORS_NORMAL = 40;
     static final int ANGLE_VISORS_COLISIO = 0;
@@ -41,10 +44,11 @@ public class Bitxo22 extends Agent {
 
     @Override
     public void avaluaComportament() {
-        int dir;
-        Objecte mina;
         temps++;
+        if (estat != null) {
+            anteriorImpactes = estat.impactesRebuts;
 
+        }
         estat = estatCombat();
         if (espera > 0) {
             espera--;
@@ -54,11 +58,6 @@ public class Bitxo22 extends Agent {
             if (estat.enCollisio) // situació de nau bloquejada
             {
                 tempsColisio++;
-                if (tempsColisio == 5) {
-                    posaAngleVisors(ANGLE_VISORS_COLISIO);
-                }
-
-                hyperespaiColisio(tempsColisio);
                 // si veu la nau, dispara
                 if (estat.objecteVisor[CENTRAL] == NAU && estat.bales > 0) {
                     dispara();   //bloqueig per nau, no giris dispara
@@ -77,64 +76,30 @@ public class Bitxo22 extends Agent {
                         endavant();
                     }
                 }
+                if (tempsColisio > 25) {
+                    hyperespai();
+                    tempsColisio = 0;
+                }
             } else {
-                posaAngleVisors(ANGLE_VISORS_NORMAL);
                 tempsColisio = 0;
                 endavant();
                 ObjecteMesProper();
-                mina = closestMina();
-                if (estat.objecteVisor[CENTRAL] == NAU && !estat.disparant && estat.bales > 5) {
+                if (estat.objecteVisor[CENTRAL] == NAU && !estat.disparant) {
                     dispara();
                 }
-                //Dodgear minas
-                int minas = 0;
-                if (mina != null) {
-                    if (mina.agafaSector() == 3 && mina.agafaDistancia() < 35) {
-                        minas += 1;
-                    }
-                    if (estat.objecteVisor[CENTRAL] == MINA && mina.agafaDistancia() < 45) {
-                        minas += 2;
-                    }
-                    if (mina.agafaSector() == 2 && mina.agafaDistancia() < 35) {
-                        minas += 4;
-                    }
-                    switch (minas) {
-                        case 0:
-                            endavant();
-                            break;
-                        case 1:
-                        case 3: //mina a la izquierda
-                            gira(-90);
-                            break;
-                        case 4:
-                        case 6: //mina a la derecha
-                            gira(90);
-                            break;
-                        case 5:
-                            endavant();
-                            break;
-                        case 2:
-                        case 7:
-                            gira(90);
-                            enrere();
-                            espera = 2;
-                            break;
-                    }
-                }
-
+                evasio();
                 // Miram els visors per detectar els obstacles
                 int sensor = 0;
 
-                if ((minas == 1 || minas == 3) || (estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] < 45)) {
+                if ((estat.objecteVisor[ESQUERRA] == PARET && estat.distanciaVisors[ESQUERRA] < 45)) {
                     sensor += 1;
                 }
-                if ((minas == 4 || minas == 6) || (estat.objecteVisor[CENTRAL] == PARET && estat.distanciaVisors[CENTRAL] < 45)) {
+                if ((estat.objecteVisor[CENTRAL] == PARET && estat.distanciaVisors[CENTRAL] < 45)) {
                     sensor += 2;
                 }
-                if ((minas == 2 || minas == 7) || (estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] < 45)) {
+                if ((estat.objecteVisor[DRETA] == PARET && estat.distanciaVisors[DRETA] < 45)) {
                     sensor += 4;
                 }
-
                 switch (sensor) {
                     case 0:
                         endavant();
@@ -156,7 +121,7 @@ public class Bitxo22 extends Agent {
                         distancia = minimaDistanciaVisors();
 
                         if (distancia < 15) {
-                            esquerra();
+                            gira(90);
                             enrere();
                             espera = 2;
                         } else {
@@ -169,7 +134,7 @@ public class Bitxo22 extends Agent {
                         }
                         break;
                 }
-
+                esquivarMina();
             }
 
         }
@@ -194,11 +159,9 @@ public class Bitxo22 extends Agent {
 
     public void ObjecteMesProper() {
         if (closestRecurs() != null && closestEnemic() != null) {
-
-            if (closestEnemic().agafaDistancia() <= closestRecurs().agafaDistancia()) {
+            posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
+            if (closestEnemic().agafaDistancia() <= closestRecurs().agafaDistancia() && estat.bales > 0) {
                 mira(closestEnemic());
-                posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
-
             } else {
                 mira(closestRecurs());
             }
@@ -206,11 +169,12 @@ public class Bitxo22 extends Agent {
             mira(closestRecurs());
             posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
         } else if (closestRecurs() == null && closestEnemic() != null) {
-            mira(closestEnemic());
             posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
+            if (estat.bales > 0) {
+                mira(closestEnemic());
+            }
         } else {
             posaVelocitatLineal(VELOCITAT_LINEAL_NORMAL);
-
         }
 
     }
@@ -289,13 +253,64 @@ public class Bitxo22 extends Agent {
         return mesCercana;
     }
 
-    void hyperespaiColisio(long tempsColisio) {
-        if (tempsColisio > 30 && estat.hyperespaiDisponibles > 0) {
-            hyperespai();
+    void esquivarMina() {
+        Objecte mina = closestMina();
+        int minas = 0;
+        if (mina != null) {
+            if (mina.agafaSector() == 3 && mina.agafaDistancia() < 30) {
+                minas += 1;
+            }
+            if (estat.objecteVisor[CENTRAL] == MINA && mina.agafaDistancia() < 40) {
+                minas += 2;
+            }
+            if (mina.agafaSector() == 2 && mina.agafaDistancia() < 30) {
+                minas += 4;
+            }
+            switch (minas) {
+                case 0:
+                    endavant();
+                    break;
+                case 1:
+                case 3: //mina a la izquierda
+                    gira(-90);
+                    break;
+                case 4:
+                case 6: //mina a la derecha
+                    gira(90);
+                    break;
+                case 5:
+                    endavant();
+                    break;
+                case 2:
+                case 7:
+                    gira(90);
+                    enrere();
+                    espera = 2;
+                    break;
+            }
         }
+
     }
 
     void evasio() {
-
+        if (estat.impactesRebuts > anteriorImpactes || enEvasio) {
+            enEvasio = true;
+            tempsEvasio++;
+            if (tempsEvasio > 63) {
+                enEvasio = false;
+                tempsEvasio = 0;
+            }
+           int gir=tempsEvasio%15;
+           if(gir<7){
+               esquerra();
+           }else if(gir<9){
+               endavant();
+           }else{
+               dreta();
+           }
+           if(estat.impactesRebuts==4 && estat.hyperespaiDisponibles>0){
+               hyperespai();
+           }
+        }
     }
 }
