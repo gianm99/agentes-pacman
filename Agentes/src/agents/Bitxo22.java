@@ -179,20 +179,23 @@ public class Bitxo22 extends Agent {
      * mètode mira()
      */
     public void ObjecteMesProper() {
-        if (closestRecurs() != null && closestEnemic() != null) { //enemic i recurs
+        Objecte closestRecurs, closestEnemic;
+        closestRecurs = closestRecurs();
+        closestEnemic = closestEnemic();
+        if (closestRecurs != null && closestEnemic != null) { //enemic i recurs
             posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
-            if (closestEnemic().agafaDistancia() <= closestRecurs().agafaDistancia() && estat.bales > 0) {
-                mira(closestEnemic());
+            if (closestEnemic.agafaDistancia() <= closestRecurs.agafaDistancia() && estat.bales > 0) {
+                mira(closestEnemic);
             } else {
-                mira(closestRecurs());
+                mira(closestRecurs);
             }
-        } else if (closestRecurs() != null && closestEnemic() == null) { //enemic
-            mira(closestRecurs());
+        } else if (closestRecurs != null && closestEnemic == null) { //enemic
+            mira(closestRecurs);
             posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
-        } else if (closestRecurs() == null && closestEnemic() != null) { //recurs
+        } else if (closestRecurs == null && closestEnemic != null) { //recurs
             posaVelocitatLineal(VELOCITAT_LINEAL_COMBAT);
             if (estat.bales > 0) {
-                mira(closestEnemic());
+                mira(closestEnemic);
             }
         } else { //ni enemic ni recurs
             posaVelocitatLineal(VELOCITAT_LINEAL_NORMAL);
