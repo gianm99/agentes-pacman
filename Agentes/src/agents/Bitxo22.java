@@ -88,7 +88,7 @@ public class Bitxo22 extends Agent {
                         endavant();
                     }
                 }
-                if (tempsColisio > 25) {
+                if (tempsColisio > 20) {
                     //si duu en col·lisió molt de temps, fa hyperespai
                     hyperespai();
                     tempsColisio = 0;
@@ -341,7 +341,7 @@ public class Bitxo22 extends Agent {
     }
 
     /**
-     * Comprova si l'estan disparant i si això es compleix activa el mode
+     * Comprova si l'estan disparant i si això es compleix, activa el mode
      * "evasió". El que fa és accelerar i realitzar una trajectòria en ziga
      * zaga.
      */
