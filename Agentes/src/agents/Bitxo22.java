@@ -64,7 +64,7 @@ public class Bitxo22 extends Agent {
             {
                 //
                 tempsColisio++;
-                // si veu la nau, dispara
+                // si veu una nau, dispara
                 if (estat.objecteVisor[CENTRAL] == NAU && estat.bales > 0) {
                     dispara();   //bloqueig per nau, no giris dispara
                     tempsColisio = 0;
@@ -126,7 +126,7 @@ public class Bitxo22 extends Agent {
                     case 5:
                         endavant();
                         break; // centre lliure
-                    case 2: // paret devant
+                    case 2: // paret davant
                     case 7: // si estic molt aprop, torna enrere
                         double distancia;
                         distancia = minimaDistanciaVisors();
