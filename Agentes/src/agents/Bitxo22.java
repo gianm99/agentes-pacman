@@ -310,7 +310,7 @@ public class Bitxo22 extends Agent {
             if (mina.agafaSector() == 3 && mina.agafaDistancia() < 20) {
                 minas += 1;
             }
-            if (estat.objecteVisor[CENTRAL] == MINA && mina.agafaDistancia() < 40) {
+            if (estat.objecteVisor[CENTRAL] == MINA && mina.agafaDistancia() < 30) {
                 minas += 2;
             }
             if (mina.agafaSector() == 2 && mina.agafaDistancia() < 20) {
